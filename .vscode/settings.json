@@ -1,0 +1,4 @@
+{
+    "python.pythonPath": "/home/azizi/.local/share/virtualenvs/redmine-api-grabber-fBD2sgqS/bin/python",
+    "python.formatting.provider": "black"
+}

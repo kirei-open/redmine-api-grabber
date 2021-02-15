@@ -1,7 +1,9 @@
 from itertools import groupby
+from pprint import pprint
 import urllib.parse
 import pandas as pd
-from pprint import pprint
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 
 def count_status(issues):
@@ -33,11 +35,13 @@ def get_all_projects():
 
 def get_project_by_id(project_id):
     project = redmine.project.get(project_id)
-    issues = list(
-        redmine.issue.filter(
-            status_id="*", project_id=project_id, is_private=False
-        ).values()
-    )
+    issues = [
+        i
+        for i in list(
+            redmine.issue.filter(status_id="*", project_id=project_id).values()
+        )
+        if i["is_private"] == False
+    ]
     result = {
         "id": project.id,
         "name": project.name,
@@ -74,7 +78,7 @@ def get_issues_assigned_for(name):
         ),
         key=lambda x: x["project"]["name"],
     )
-    pprint(all_issues)
+    # pprint(all_issues)
     grouped_issues = [
         (project_name, list(issues))
         for project_name, issues in groupby(
@@ -104,7 +108,7 @@ def get_issues_assigned_for(name):
 # All Project Summary
 def get_all_project_summary():
     all_issues = sorted(
-        list(redmine.issue.all().filter(is_private=False).values()),
+        [i for i in list(redmine.issue.all().values()) if i["is_private"] == False],
         key=lambda x: x["project"]["name"],
     )
     grouped_issues = [
@@ -122,7 +126,6 @@ def get_all_project_summary():
                 {"name": name["user"]["name"]}
                 for name in get_project_membership(issues[0]["project"]["id"])
             ],
-            # "issues": issues,
         }
         for project_name, issues in grouped_issues
     ]
@@ -141,7 +144,7 @@ def get_open_issues_before_date_by_project_id(sdate, edate, project_id):
             ),
             key=lambda x: x["updated_on"],
         )
-        pprint(issues)
+        # pprint(issues)
         grouped_by_date = [
             {
                 "date": k + ":00:00Z",
@@ -213,6 +216,37 @@ def get_open_issues_before_date(sdate, edate):
         return
 
 
+def count_issues_before_date(edate):
+    issues = sorted(
+        [
+            i
+            for i in list(
+                redmine.issue.filter(
+                    status_id="*",
+                    updated_on="<={}".format(edate),
+                ).values()
+            )
+            if i["is_private"] == False
+        ],
+        key=lambda x: x["updated_on"],
+    )
+    return count_status(issues)
+
+
+def get_issues_graph(sdate, edate):
+    sdate = datetime.strptime(sdate, "%Y-%m-%d").strftime("%Y-%m-%d %H:%M:%S")
+    edate = (datetime.strptime(edate, "%Y-%m-%d") + relativedelta(days=1)).strftime(
+        "%Y-%m-%d %H:%M:%S"
+    )
+    cursor = db.cursor(dictionary=True)
+    query = "SELECT id, datetime AS date, (new + in_progress + feedback) AS count FROM issues_graph WHERE datetime<='{}' AND datetime>='{}' ORDER BY id ASC".format(
+        edate, sdate
+    )
+    cursor.execute(query)
+    data = cursor.fetchall()
+    return data
+
+
 def get_all_users():
     users = list(redmine.user.all().values())
     for user in users:
@@ -220,4 +254,4 @@ def get_all_users():
     return list(users)
 
 
-from ..main import redmine
+from ..main import redmine, db

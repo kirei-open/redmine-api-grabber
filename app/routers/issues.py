@@ -6,7 +6,7 @@ router = APIRouter()
 
 @router.get("/graph")
 async def graph_issues(sdate: str, edate: str):
-    return redmine.get_open_issues_before_date(sdate, edate)
+    return redmine.get_issues_graph(sdate, edate)
 
 
 @router.get("/assigned_for/{name}")

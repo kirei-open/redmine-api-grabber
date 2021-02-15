@@ -11,6 +11,8 @@ fastapi = {extras = ["all"], version = "*"}
 python-redmine = "*"
 python-dotenv = "*"
 pandas = "*"
+apscheduler = "*"
+mysql-connector = "*"
 
 [requires]
 python_version = "3.7"

@@ -1,12 +1,18 @@
 from functools import lru_cache
+from typing import Optional
+
 from fastapi import Depends, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from jose import JWTError, jwt
 
 from redminelib import Redmine
-from app import config
-from fastapi.middleware.cors import CORSMiddleware
+
 from apscheduler.schedulers.background import BackgroundScheduler
-import logging
+
 import mysql.connector
+
+from app import config
 
 
 @lru_cache()
@@ -15,7 +21,6 @@ def get_settings():
 
 
 redmine = Redmine(get_settings().redmine_url, key=get_settings().redmine_api_token)
-
 
 app = FastAPI(title="Redmine API Grabber", root_path="/api/v1")
 
@@ -38,6 +43,7 @@ Schedule = None
 
 from .routers import admin, issues, projects, users
 from .services import scheduler
+from app.dependencies import get_token_header
 
 
 @app.on_event("startup")

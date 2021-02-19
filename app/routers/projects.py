@@ -14,6 +14,9 @@ async def get_all_projects():
 async def get_all_project_summary():
     return redmine.get_all_project_summary()
 
+@router.get("/details")
+async def get_all_project_detail():
+    return redmine.get_all_project_detail()
 
 @router.get("/{id}")
 async def get_project_by_id(id: int):

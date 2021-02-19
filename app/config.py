@@ -14,5 +14,8 @@ class Settings(BaseSettings):
     portal_db_user: str
     portal_db_password: str
 
+    secret_key: str
+    algorithm: str
+
     class Config:
         env_file = ".env"

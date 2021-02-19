@@ -52,6 +52,14 @@ def get_project_by_id(project_id):
     }
     return result
 
+def get_all_project_detail():
+    results = []
+    projects = get_all_projects()
+    for project in projects:
+        result = get_project_by_id(project["id"])
+        result["issues"] = sorted(result["issues"], key=lambda x:x["created_on"], reverse=True)[:10]
+        results.append(result)
+    return results
 
 def get_project_membership(project_id):
     project = redmine.project.get(project_id)
@@ -59,6 +67,30 @@ def get_project_membership(project_id):
 
 
 # Issue For Assigned Name
+
+
+def get_most_recent_issues():
+    all_issues = (
+        list(
+            redmine.issue.all(
+                sort="created_on:desc",
+                include=[
+                    "project",
+                    "status",
+                    "subject",
+                    "assigned_to",
+                    "tracker",
+                    "priority",
+                ],
+                limit=10,
+            )
+            .filter(is_private=False)
+            .values()
+        ),
+    )
+    return all_issues
+
+
 def get_issues_assigned_for(name):
     name = urllib.parse.unquote(name)
     all_issues = sorted(

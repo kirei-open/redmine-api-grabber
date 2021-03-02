@@ -6,11 +6,11 @@ def get_birthday_today():
     datetime_now = (
         (datetime.now() + relativedelta(hours=7))
         .replace(minute=0, second=0)
-        .strftime("%Y-%m-%d")
+        .strftime("%m-%d")
     )
     db_portal = sql_connection("portal")
     cursor = db_portal.cursor(dictionary=True)
-    query = "SELECT fullname, birthday FROM tbl_user WHERE birthday = '{}'".format(
+    query = "SELECT fullname, birthday FROM tbl_user WHERE birthday LIKE '%{}%'".format(
         datetime_now
     )
     print(query)

@@ -6,5 +6,5 @@ router = APIRouter()
 
 
 @router.get("/")
-async def get_all_users():
+def get_all_users():
     return redmine.get_all_users()

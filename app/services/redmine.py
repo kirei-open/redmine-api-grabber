@@ -5,7 +5,6 @@ import pandas as pd
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
-
 def count_status(issues):
     closed_status = ["Resolved", "Closed"]
     result = {
@@ -270,12 +269,15 @@ def get_issues_graph(sdate, edate):
     edate = (datetime.strptime(edate, "%Y-%m-%d") + relativedelta(days=1)).strftime(
         "%Y-%m-%d %H:%M:%S"
     )
+    db = sql_connection("redmine")
     cursor = db.cursor(dictionary=True)
     query = "SELECT id, datetime AS date, (new + in_progress + feedback) AS count FROM issues_graph WHERE datetime<='{}' AND datetime>='{}' ORDER BY id ASC".format(
         edate, sdate
     )
     cursor.execute(query)
     data = cursor.fetchall()
+    cursor.close()
+    db.close()
     return data
 
 
@@ -286,4 +288,4 @@ def get_all_users():
     return list(users)
 
 
-from ..main import redmine, db
+from ..main import redmine, sql_connection

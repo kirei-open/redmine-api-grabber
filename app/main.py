@@ -24,19 +24,29 @@ redmine = Redmine(get_settings().redmine_url, key=get_settings().redmine_api_tok
 
 app = FastAPI(title="Redmine API Grabber", root_path="/api/v1")
 
-db = mysql.connector.connect(
+mysql.connector.connect(
     host=get_settings().redmine_db_host,
     user=get_settings().redmine_db_user,
     password=get_settings().redmine_db_password,
     database=get_settings().redmine_db_name,
+    pool_name='redmine',
+    pool_size = 10,
 )
 
-db_portal = mysql.connector.connect(
+mysql.connector.connect(
     host=get_settings().portal_db_host,
     user=get_settings().portal_db_user,
     password=get_settings().portal_db_password,
     database=get_settings().portal_db_name,
+    pool_name='portal',
+    pool_size = 10,
 )
+
+def sql_connection(pool_name):
+    """Get a connection and a cursor from the pool"""
+    db = mysql.connector.connect(pool_name = pool_name)
+    return db
+
 
 Schedule = None
 

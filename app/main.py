@@ -29,8 +29,8 @@ mysql.connector.connect(
     user=get_settings().redmine_db_user,
     password=get_settings().redmine_db_password,
     database=get_settings().redmine_db_name,
-    pool_name='redmine',
-    pool_size = 10,
+    pool_name="redmine",
+    pool_size=10,
 )
 
 mysql.connector.connect(
@@ -38,13 +38,14 @@ mysql.connector.connect(
     user=get_settings().portal_db_user,
     password=get_settings().portal_db_password,
     database=get_settings().portal_db_name,
-    pool_name='portal',
-    pool_size = 10,
+    pool_name="portal",
+    pool_size=10,
 )
+
 
 def sql_connection(pool_name):
     """Get a connection and a cursor from the pool"""
-    db = mysql.connector.connect(pool_name = pool_name)
+    db = mysql.connector.connect(pool_name=pool_name)
     return db
 
 
@@ -100,7 +101,27 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(admin.router, prefix="/admin", tags=["admin"])
-app.include_router(issues.router, prefix="/issues", tags=["issues"])
-app.include_router(projects.router, prefix="/projects", tags=["projects"])
-app.include_router(users.router, prefix="/users", tags=["users"])
+app.include_router(
+    admin.router,
+    prefix="/admin",
+    tags=["admin"],
+    dependencies=[Depends(get_token_header)],
+)
+app.include_router(
+    issues.router,
+    prefix="/issues",
+    tags=["issues"],
+    dependencies=[Depends(get_token_header)],
+)
+app.include_router(
+    projects.router,
+    prefix="/projects",
+    tags=["projects"],
+    dependencies=[Depends(get_token_header)],
+)
+app.include_router(
+    users.router,
+    prefix="/users",
+    tags=["users"],
+    dependencies=[Depends(get_token_header)],
+)

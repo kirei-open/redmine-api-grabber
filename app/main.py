@@ -87,6 +87,9 @@ async def pickle_schedule():
 origins = [
     "http://localhost",
     "http://localhost:8080",
+    "http://localhost:5000",
+    "http://highlight.kirei.co.id",
+    "https://highlight.kirei.co.id",
 ]
 
 app.add_middleware(

@@ -1,13 +1,17 @@
 from functools import lru_cache
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, WebSocket, WebSocketDisconnect
 
 from redminelib import Redmine
 from app import config
 from fastapi.middleware.cors import CORSMiddleware
 from apscheduler.schedulers.background import BackgroundScheduler
+
+from typing import List
+
 import logging
 import mysql.connector
 
+import random 
 
 @lru_cache()
 def get_settings():
@@ -16,8 +20,7 @@ def get_settings():
 
 redmine = Redmine(get_settings().redmine_url, key=get_settings().redmine_api_token)
 
-
-app = FastAPI(title="Redmine API Grabber", root_path="/api/v1")
+app = FastAPI(title="Redmine API Grabber", root_path=get_settings().root_path)
 
 db = mysql.connector.connect(
     host=get_settings().redmine_db_host,
@@ -39,6 +42,27 @@ Schedule = None
 from .routers import admin, issues, projects, users
 from .services import scheduler
 
+
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: List[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
+
+    async def send_personal_message(self, message: str, websocket: WebSocket):
+        await websocket.send_text(message)
+
+    async def send_json(self, message: dict, websocket: WebSocket):
+        await websocket.send_json(message)
+
+    async def broadcast(self, message: dict):
+        for connection in self.active_connections:
+            await connection.send_json(message)
 
 @app.on_event("startup")
 async def load_schedule_or_create_blank():
@@ -67,6 +91,21 @@ async def pickle_schedule():
     Schedule.shutdown()
     print("Disabled Schedule")
 
+manager = ConnectionManager()
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    print("Accepting client connection...")
+    await manager.connect(websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            response = {"value": "Testing Data WS " + str(random.uniform(0, 1))}
+            await manager.broadcast(response)
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+        await manager.broadcast(f"Client left server")
+    print("Bye..")
 
 origins = [
     "http://localhost",

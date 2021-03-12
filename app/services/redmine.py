@@ -5,7 +5,6 @@ import pandas as pd
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
-
 def count_status(issues):
     closed_status = ["Resolved", "Closed"]
     result = {
@@ -52,6 +51,14 @@ def get_project_by_id(project_id):
     }
     return result
 
+def get_all_project_detail():
+    results = []
+    projects = get_all_projects()
+    for project in projects:
+        result = get_project_by_id(project["id"])
+        result["issues"] = sorted(result["issues"], key=lambda x:x["created_on"], reverse=True)[:10]
+        results.append(result)
+    return results
 
 def get_project_membership(project_id):
     project = redmine.project.get(project_id)
@@ -59,6 +66,30 @@ def get_project_membership(project_id):
 
 
 # Issue For Assigned Name
+
+
+def get_most_recent_issues():
+    all_issues = (
+        list(
+            redmine.issue.all(
+                sort="created_on:desc",
+                include=[
+                    "project",
+                    "status",
+                    "subject",
+                    "assigned_to",
+                    "tracker",
+                    "priority",
+                ],
+                limit=10,
+            )
+            .filter(is_private=False)
+            .values()
+        ),
+    )
+    return all_issues
+
+
 def get_issues_assigned_for(name):
     name = urllib.parse.unquote(name)
     all_issues = sorted(
@@ -238,12 +269,15 @@ def get_issues_graph(sdate, edate):
     edate = (datetime.strptime(edate, "%Y-%m-%d") + relativedelta(days=1)).strftime(
         "%Y-%m-%d %H:%M:%S"
     )
+    db = sql_connection("redmine")
     cursor = db.cursor(dictionary=True)
     query = "SELECT id, datetime AS date, (new + in_progress + feedback) AS count FROM issues_graph WHERE datetime<='{}' AND datetime>='{}' ORDER BY id ASC".format(
         edate, sdate
     )
     cursor.execute(query)
     data = cursor.fetchall()
+    cursor.close()
+    db.close()
     return data
 
 
@@ -254,4 +288,4 @@ def get_all_users():
     return list(users)
 
 
-from ..main import redmine, db
+from ..main import redmine, sql_connection

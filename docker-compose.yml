@@ -1,0 +1,8 @@
+version: '3'
+services:
+  fast-api:
+    image: 'alfianazizi/redmine-fastapi-slim:latest'
+    ports:
+      - 8000:80
+    env_file: '.env'
+    container_name: 'redmine-api-slim'

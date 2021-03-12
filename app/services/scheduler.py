@@ -4,6 +4,7 @@ from dateutil.relativedelta import relativedelta
 
 
 def insert_issues_statuses():
+    db = sql_connection("redmine")
     cursor = db.cursor()
     now = (datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d")
     status = count_issues_before_date(now)
@@ -22,9 +23,11 @@ def insert_issues_statuses():
     # try:
     cursor.execute(query)
     db.commit()
+    cursor.close()
+    db.close()
     # except Exception as e:
     # print(e)
     return
 
 
-from ..main import db
+from ..main import sql_connection

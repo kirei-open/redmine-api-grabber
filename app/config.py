@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     portal_db_name: str
     portal_db_user: str
     portal_db_password: str
+    root_path: str
 
     secret_key: str
     algorithm: str

@@ -3,6 +3,7 @@ from typing import Optional, List
 
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Depends, FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.staticfiles import StaticFiles
 
 from jose import JWTError, jwt
 
@@ -53,7 +54,7 @@ def sql_connection(pool_name):
 Schedule = None
 
 
-from .routers import admin, issues, projects, users
+from .routers import admin, issues, projects, users, portal
 from .services import scheduler
 from app.dependencies import get_token_header
 
@@ -130,6 +131,9 @@ origins = [
     "https://highlight.kirei.co.id",
 ]
 
+# get static files
+app.mount('/static',StaticFiles(directory="static"),name="static")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -160,5 +164,12 @@ app.include_router(
     users.router,
     prefix="/users",
     tags=["users"],
+    dependencies=[Depends(get_token_header)],
+)
+
+app.include_router(
+    portal.router,
+    prefix="/portal",
+    tags=["Portal"],
     dependencies=[Depends(get_token_header)],
 )

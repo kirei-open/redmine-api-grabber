@@ -13,7 +13,7 @@ def get_birthday_today():
     query = "SELECT fullname, birthday FROM tbl_user WHERE birthday LIKE '%{}%'".format(
         datetime_now
     )
-    print(query)
+    # print(query)
     cursor.execute(query)
     data = cursor.fetchall()
     cursor.close()

@@ -14,7 +14,9 @@ import time
 def get_post():
     db_portal = sql_connection("portal")
     cursor = db_portal.cursor(dictionary=True)
-    query = "SELECT l.post_id AS id, l.post_desc AS description, l.post_user_id AS user_id, date_format(l.post_date,'%Y-%m-%d %T') AS date, ( SELECT JSON_EXTRACT( IFNULL( CONCAT( '[', GROUP_CONCAT( JSON_OBJECT( 'id', a.id, 'comment', a.comment,'user_id', a.user_id , 'post_id', a.post_id) ), ']' ) ,'[]'),'$') FROM tbl_comment AS a WHERE a.post_id = l.post_id ) AS comment FROM post as l"
+    # query = "SELECT l.post_id AS id, l.post_desc AS description, l.post_user_id AS user_id, date_format(l.post_date,'%Y-%m-%d %T') AS date, ( SELECT JSON_EXTRACT( IFNULL( CONCAT( '[', GROUP_CONCAT( JSON_OBJECT( 'id', a.id, 'comment', a.comment,'user_id', a.user_id , 'post_id', a.post_id) ), ']' ) ,'[]'),'$') FROM tbl_comment AS a WHERE a.post_id = l.post_id ) AS comment FROM post as l"
+    # query = "SELECT a.post_id AS id, a.post_desc AS description, a.post_user_id AS user_id, date_format(a.post_date,'%Y-%m-%d %T') AS date, IFNULL(CONCAT( '[', GROUP_CONCAT( JSON_OBJECT( 'id', b.id, 'comment', b.comment,'user_id', b.user_id , 'post_id', b.post_id) ), ']' ),'[]') AS comment FROM post AS a LEFT JOIN tbl_comment AS b ON a.post_id = b.post_id GROUP BY a.post_id, a.post_desc"
+    query = "SELECT l.post_id AS id, l.post_desc AS description, l.post_user_id AS user_id, date_format(l.post_date,'%Y-%m-%d %T') AS date, ( SELECT IFNULL( CONCAT( '[', GROUP_CONCAT( JSON_OBJECT( 'id', a.id, 'comment', a.comment,'user_id', a.user_id , 'post_id', a.post_id) ), ']' ) ,'[]') FROM tbl_comment AS a WHERE a.post_id = l.post_id ) AS comment FROM post as l"
     cursor.execute(query)
     data = cursor.fetchall()
     for i in data:

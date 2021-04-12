@@ -92,6 +92,7 @@ async def load_schedule_or_create_blank():
         Schedule.add_job(
             scheduler.insert_issues_statuses, "cron", hour="*/1", id="issues"
         )
+        Schedule.add_job(portal.get_birthday, "cron", hour="6", minute="0", second='1', id="birthday")
         Schedule.start()
         print("Created Schedule Object")
     except:

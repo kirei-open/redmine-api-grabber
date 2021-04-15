@@ -28,7 +28,7 @@ def get_absence(date):
     )
     db_portal = sql_connection("portal")
     cursor = db_portal.cursor(dictionary=True)
-    query = "SELECT absent_date, absent_desc, fullname FROM absent INNER JOIN tbl_user WHERE absent_user_id = tbl_user.id_user AND absent_date >= '{}' AND absent_date <= '{}'".format(
+    query = "SELECT absent_date, absent_desc, absent_photo, fullname FROM absent INNER JOIN tbl_user WHERE absent_user_id = tbl_user.id_user AND absent_date >= '{}' AND absent_date <= '{}'".format(
         sdate, edate
     )
     cursor.execute(query)

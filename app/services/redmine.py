@@ -45,7 +45,11 @@ def get_project_by_id(project_id):
         "id": project.id,
         "name": project.name,
         "description": project.description,
-        "members": project.memberships.values(),
+        "members":[
+                    {"name": name["user"]["name"], "roles": name["roles"]}
+                    for name in project.memberships.values()
+                ],
+        # "members": project.memberships.values(),
         "status_count": count_status(issues),
         "issues": issues,
     }

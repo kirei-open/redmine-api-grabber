@@ -13,6 +13,10 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 import mysql.connector
 
+from fastapi_cache import caches, close_caches
+from fastapi_cache.backends.redis import CACHE_KEY, RedisCacheBackend
+
+
 from app import config
 
 import logging
@@ -23,6 +27,8 @@ def get_settings():
     return config.Settings()
 
 redmine = Redmine(get_settings().redmine_url, key=get_settings().redmine_api_token)
+redis_host = get_settings().redis_host
+redis_port = get_settings().redis_port
 
 app = FastAPI(title="Redmine API Grabber", root_path=get_settings().root_path)
 
@@ -49,6 +55,9 @@ def sql_connection(pool_name):
     """Get a connection and a cursor from the pool"""
     db = mysql.connector.connect(pool_name=pool_name)
     return db
+
+def redis_cache():
+    return caches.get(CACHE_KEY)
 
 
 Schedule = None
@@ -107,6 +116,18 @@ async def pickle_schedule():
     global Schedule
     Schedule.shutdown()
     print("Disabled Schedule")
+
+
+
+@app.on_event('startup')
+async def on_startup() -> None:
+    rc = RedisCacheBackend(f'redis://{redis_host}:{redis_port}')
+    caches.set(CACHE_KEY, rc)
+
+@app.on_event('shutdown')
+async def on_shutdown() -> None:
+    await close_caches()
+
 
 manager = ConnectionManager()
 

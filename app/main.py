@@ -29,6 +29,7 @@ def get_settings():
 redmine = Redmine(get_settings().redmine_url, key=get_settings().redmine_api_token)
 redis_host = get_settings().redis_host
 redis_port = get_settings().redis_port
+redis_password = get_settings().redis_password
 
 app = FastAPI(title="Redmine API Grabber", root_path=get_settings().root_path)
 
@@ -121,7 +122,7 @@ async def pickle_schedule():
 
 @app.on_event('startup')
 async def on_startup() -> None:
-    rc = RedisCacheBackend(f'redis://{redis_host}:{redis_port}')
+    rc = RedisCacheBackend(f'redis://:{redis_password}@{redis_host}:{redis_port}')
     caches.set(CACHE_KEY, rc)
 
 @app.on_event('shutdown')

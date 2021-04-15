@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     root_path: str
     redis_host: str
     redis_port: str
+    redis_password: str
 
     secret_key: str
     algorithm: str

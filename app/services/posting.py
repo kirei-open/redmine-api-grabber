@@ -40,7 +40,9 @@ def create_post(post:schemas.CreatePost,token:str):
     db_portal.close()
     return data
 
-def get_laporan(user_id):
+def get_laporan(token):
+    user = Jwtdecode.decoded(token)
+    user_id = user['id']
     db_portal = sql_connection("portal")
     cursor = db_portal.cursor(dictionary=True)
     query = "SELECT * FROM tbl_report WHERE report_user_id = {}".format(user_id)
@@ -79,7 +81,9 @@ def crete_comment(comment: schemas.CreateComment, token:str):
     db_portal.close()
     return data
 
-def create_absent(deskripsi: str, user_id: int, photo: Optional[UploadFile] = File(None)):
+def create_absent(deskripsi, x_token, photo):
+    user = Jwtdecode.decoded(token=x_token)
+    user_id = user['id']
     photo_name = ""
     if photo != None:
         file_name = str(int(time.time() * 1000)) + "_"+  photo.filename

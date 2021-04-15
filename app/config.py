@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     portal_db_user: str
     portal_db_password: str
     root_path: str
+    redis_host: str
+    redis_port: str
 
     secret_key: str
     algorithm: str

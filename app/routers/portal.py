@@ -23,12 +23,12 @@ async def get_all_post(cache : RedisCacheBackend = Depends(redis_cache),x_token:
     return data
 
 @router.post('/posting')
-def create_new_post(post: schemas.CreatePost, x_token: str = Header(...)):
-    return posting.create_post(post=post, token=x_token);
+async def create_new_post(post: schemas.CreatePost, cache : RedisCacheBackend = Depends(redis_cache), x_token: str = Header(...)):
+    return await postingController.create_new_post(post, cache, x_token)
 
 @router.post('/comment')
-def create_new_comment(comment: schemas.CreateComment, x_token: str = Header(...)):
-    return posting.crete_comment(comment, token=x_token);
+async def create_new_comment(comment: schemas.CreateComment, cache : RedisCacheBackend = Depends(redis_cache), x_token: str = Header(...)):
+    return await postingController.create_new_comment(comment, cache, x_token)
 
 @router.get('/laporan')
 async def get_user_laporan(cache : RedisCacheBackend = Depends(redis_cache),x_token: str = Header(...)):

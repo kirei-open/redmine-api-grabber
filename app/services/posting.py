@@ -5,21 +5,43 @@ from ..main import sql_connection
 from fastapi import File, UploadFile, HTTPException
 from typing import Optional
 from app.middleware import Jwtdecode
+from dotenv import load_dotenv
+import requests
 import json
 import string
 import random
 import time
+import os
+
+load_dotenv()
+
+token = os.getenv('TOKEN')
+akun_url = os.getenv('AKUN_URL')
 
 
 def get_post():
     db_portal = sql_connection("portal")
     cursor = db_portal.cursor(dictionary=True)
+    headers = {'x-token':token}
+    url = '{}/users/?skip=0&limit=100'.format(akun_url)
+    user = requests.get(url, headers=headers)
+    userData = user.json()
     # query = "SELECT l.post_id AS id, l.post_desc AS description, l.post_user_id AS user_id, date_format(l.post_date,'%Y-%m-%d %T') AS date, ( SELECT JSON_EXTRACT( IFNULL( CONCAT( '[', GROUP_CONCAT( JSON_OBJECT( 'id', a.id, 'comment', a.comment,'user_id', a.user_id , 'post_id', a.post_id) ), ']' ) ,'[]'),'$') FROM tbl_comment AS a WHERE a.post_id = l.post_id ) AS comment FROM post as l"
     # query = "SELECT a.post_id AS id, a.post_desc AS description, a.post_user_id AS user_id, date_format(a.post_date,'%Y-%m-%d %T') AS date, IFNULL(CONCAT( '[', GROUP_CONCAT( JSON_OBJECT( 'id', b.id, 'comment', b.comment,'user_id', b.user_id , 'post_id', b.post_id) ), ']' ),'[]') AS comment FROM post AS a LEFT JOIN tbl_comment AS b ON a.post_id = b.post_id GROUP BY a.post_id, a.post_desc"
-    query = "SELECT l.post_id AS id, l.post_desc AS description, l.post_user_id AS user_id, date_format(l.post_date,'%Y-%m-%d %T') AS date, ( SELECT IFNULL( CONCAT( '[', GROUP_CONCAT( JSON_OBJECT( 'id', a.id, 'comment', a.comment,'user_id', a.user_id , 'post_id', a.post_id) ), ']' ) ,'[]') FROM tbl_comment AS a WHERE a.post_id = l.post_id ) AS comment FROM post as l"
+    query = "SELECT l.post_id AS id, l.post_desc AS description, l.post_user_id as user_id , u.fullname AS name, date_format(l.post_date,'%Y-%m-%d %T') AS date, ( SELECT IFNULL( CONCAT( '[', GROUP_CONCAT( JSON_OBJECT( 'id', a.id, 'comment', a.comment,'user_id', a.user_id , 'post_id', a.post_id , 'name', b.fullname) ), ']' ) ,'[]') FROM tbl_comment AS a JOIN tbl_user as b ON b.id_user = a.user_id WHERE a.post_id = l.post_id ) AS comment FROM post as l JOIN tbl_user as u ON u.id_user = l.post_user_id order by l.post_date desc"
     cursor.execute(query)
     data = cursor.fetchall()
     for i in data:
+        for index, item in enumerate(userData):
+            if item['id'] == i['user_id']:
+                if len(item['profile']) > 0:
+                    if item['profile'][0]['photo'] is not None:
+                        i['photo'] = item['profile'][0]['photo']
+                    else:
+                        i['photo'] = 'profile.png'
+                else:
+                    i['photo'] = 'profile.png'
+                break
         if i['comment'] != None:
             i['comment'] = json.loads(i['comment'])
     cursor.close()

@@ -7,6 +7,7 @@ class Comment(BaseModel):
     comment: str
     post_id:int
     user_id:int
+    name: str
 
     class Config:
         orm_mode: True
@@ -15,7 +16,9 @@ class Post(BaseModel):
     id: int
     description: str
     date: str
-    user_id: int
+    user_id: str
+    name: str
+    photo: str
     comment: List[Comment] = []
 
     class Config:

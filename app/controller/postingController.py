@@ -21,8 +21,12 @@ async def create_new_comment(comment, cache, x_token):
     await redisCache.redis_cache_delete(cache, x_token, key)
     return data
 
-async def get_laporan(cache, x_token):
+async def get_laporan( x_token):
     data = posting.get_laporan(token=x_token);
+    return data
+
+def get_laporan_date(date):
+    data = posting.get_laporan_date(date)
     return data
 
 def create_new_absent(deskripsi, photo, x_token):

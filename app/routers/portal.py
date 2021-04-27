@@ -32,12 +32,17 @@ async def create_new_comment(comment: schemas.CreateComment, cache : RedisCacheB
 
 @router.get('/laporan')
 async def get_user_laporan(cache : RedisCacheBackend = Depends(redis_cache),x_token: str = Header(...)):
-    data = await postingController.get_laporan(cache, x_token)
+    data = await postingController.get_laporan( x_token)
     return data
+
+@router.get('/laporan/date')
+def get_laporan_date(date: str):
+    return postingController.get_laporan_date(date)
 
 @router.post('/laporan')
 def create_new_laporan(laporan: schemas.CreateLaporan, x_token: str = Header(...)):
     return posting.create_laporan(laporan=laporan, token=x_token);
+
 
 @router.post('/absent')
 def create_new_absent(deskripsi: str = Form (...), photo: Optional[UploadFile] = File(None), x_token: str = Header(...)):

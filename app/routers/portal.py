@@ -1,19 +1,11 @@
 from fastapi import Depends ,APIRouter, File, Form, UploadFile, Header
-from app.services import posting, portal
+from app.services import posting
 from typing import List
 from app import schemas
 from typing import Optional
-from firebase_admin import messaging
-import firebase_admin
-from firebase_admin import credentials
 from ..main import redis_cache
 from fastapi_cache.backends.redis import RedisCacheBackend
 from app.controller import postingController
-
-
-cred = credentials.Certificate("firebase/kireiportal-firebase-adminsdk-n5ag8-8f4d88463f.json")
-firebase_admin.initialize_app(cred)
-
 
 router = APIRouter()
 
@@ -49,25 +41,10 @@ def create_new_absent(deskripsi: str = Form (...), photo: Optional[UploadFile] =
     data = postingController.create_new_absent(deskripsi, photo, x_token)
     return data
 
-def get_birthday():
-    # Firebase Cloud Messaging
-    birthday = portal.get_birthday_today()
-    print(len(birthday))
-    if len(birthday) > 0:
-        for x in birthday:
-            condition = "'ultah' in topics"
-            name = x['fullname']
-            birthday = x['birthday']
-            print(name, birthday)
-            message = messaging.Message(
-                notification=messaging.Notification(
-                    title='Selamat Ulang tahun',
-                    body=str(name),
-                ),
-                condition=condition,
-            )
-            response = messaging.send(message)
-            print('Successfully sent message:', response)
+@router.post('/save_token')
+def save_token(data:schemas.SaveTokenDevice,x_token: str = Header(...)):
+    return postingController.save_token_device(data,x_token)
+
     
 
 

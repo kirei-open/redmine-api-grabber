@@ -35,3 +35,6 @@ class CreateLaporan(BaseModel):
 class CreateComment(BaseModel):
     comment: str
     post_id: int
+
+class SaveTokenDevice(BaseModel):
+    token_device: str

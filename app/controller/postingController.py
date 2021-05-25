@@ -32,3 +32,7 @@ def get_laporan_date(date):
 def create_new_absent(deskripsi, photo, x_token):
     data = posting.create_absent(deskripsi=deskripsi, photo=photo, x_token = x_token)
     return data
+
+def save_token_device(data,x_token):
+    data = posting.save_token_device(data,token=x_token)
+    return data

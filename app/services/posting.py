@@ -2,8 +2,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from app import schemas
 from ..main import sql_connection
-from fastapi import File, UploadFile, HTTPException
-from typing import Optional
+from fastapi import HTTPException
 from app.middleware import Jwtdecode
 from dotenv import load_dotenv
 import requests
@@ -142,6 +141,33 @@ def create_absent(deskripsi, x_token, photo):
     cursor.close()
     db_portal.close() 
     return data
-    
+
+def get_user(user_id):
+    db_portal = sql_connection("portal")
+    cursor = db_portal.cursor(dictionary=True)
+    query = "SELECT id_user,fullname FROM tbl_user WHERE id_user = {}".format(user_id)
+    cursor.execute(query)
+    data = cursor.fetchall()
+    cursor.close()
+    db_portal.close()
+    return data
+
+def save_token_device(data,token:str):
+    dataUser = Jwtdecode.decoded(token=token)
+    user_id = dataUser['id']
+    getUser = get_user(user_id)
+    fullname = getUser[0]['fullname']
+    if len(getUser) > 0:
+        db_portal = sql_connection("portal")
+        cursor = db_portal.cursor(dictionary=True)
+        query = "INSERT INTO tbl_token_device (token_name, token_device) VALUES (%s,%s) ON DUPLICATE KEY UPDATE token_device='{}'".format(data.token_device)
+        createData = (fullname,data.token_device)
+        cursor.execute(query,createData)
+        db_portal.commit()
+        response = {'message':"token device berhasil disimpan"}
+        db_portal.close()
+        return response
+    else:
+        return HTTPException(status_code=404, detail='User not found')
     
     

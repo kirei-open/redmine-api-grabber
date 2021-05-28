@@ -5,6 +5,7 @@ from app.services import portal as portalServices
 from datetime import datetime,date
 from ..main import sql_connection
 from dotenv import load_dotenv
+from pytanggalmerah import TanggalMerah
 import requests
 import os
 
@@ -36,17 +37,45 @@ def send_birthday_firebase():
             response = messaging.send(message)
             print('Successfully sent message:', response)
 
+def get_holiday_date():
+    t = TanggalMerah()
+    tanggalMerah = t.check()
+    if tanggalMerah == False:
+        datenow = datetime.today().strftime("%A")
+        if datenow == "Saturday":
+            return True
+        else:
+            return False
+    return tanggalMerah
+
+
 def send_notif_absen_masuk():
-    condition = "'absen_masuk' in topics"
-    message = messaging.Message(
-        notification=messaging.Notification(
-            title='Absen Masuk',
-            body='Jangan lupa absen masuk\nSelamat Bekerja',
-        ),
-        condition=condition,
-    )
-    response = messaging.send(message)
-    print('Successfully sent message:', response)
+    getHoliday = get_holiday_date()
+    if getHoliday == False:
+        condition = "'absen_masuk' in topics"
+        message = messaging.Message(
+            notification=messaging.Notification(
+                title='Kirei Absen Masuk',
+                body='Jangan lupa absen masuk\nSelamat Bekerja \U0001F60A',
+            ),
+            condition=condition,
+        )
+        response = messaging.send(message)
+        print('Successfully sent message:', response)
+
+def send_notif_absen_keluar():
+    getHoliday = get_holiday_date()
+    if getHoliday == False:
+        condition = "'absen_keluar' in topics"
+        message = messaging.Message(
+            notification=messaging.Notification(
+                title='Kirei Absen Keluar \U0001F6F5',
+                body='Jangan lupa absen keluar\nHati-hati diperjalanan pulang \U0001F917',
+            ),
+            condition=condition,
+        )
+        response = messaging.send(message)
+        print('Successfully sent message:', response)
 
 def get_token_by_fullname(fullname):
     db_portal = sql_connection("portal")

@@ -103,6 +103,7 @@ async def load_schedule_or_create_blank():
         Schedule.add_job(scheduler.insert_issues_statuses, "cron", hour="*/1", id="issues")
         Schedule.add_job(notificationController.get_birthday, "cron", hour="6", minute="0", second='1', id="birthday")
         Schedule.add_job(notificationController.absen_masuk_notification, "cron", hour="9", minute="0", second='0', id="absen_masuk")
+        Schedule.add_job(notificationController.absen_keluar_notification, "cron", hour="17", minute="0", second='0', id="absen_keluar")
         Schedule.add_job(notificationController.new_and_over_due_issues, "cron", hour="10", minute="0", second='0', id="issuesnotif")
         Schedule.start()
         print("Created Schedule Object")

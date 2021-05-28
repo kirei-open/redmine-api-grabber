@@ -68,6 +68,7 @@ pyasn1-modules==0.2.8
 pycparser==2.20
 pydantic==1.7.3
 pyparsing==2.4.7
+Pytanggalmerah==1.1.1
 pytest==6.2.2
 python-dateutil==2.8.1
 python-dotenv==0.15.0
